@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NexCity | Virtual Club Experience</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://i.ibb.co.com/jvMB3Cv1/unnamed-34-2.jpg">
+    <link rel="apple-touch-icon" href="https://i.ibb.co.com/TBGwk9M2/unnamed-33-2.jpg">
+    
+    <!-- Meta Tags for SEO -->
+    <meta name="description" content="NexCity - Pengalaman klub virtual imersif dengan audio 3D dan interaksi real-time. Bergabunglah dengan ribuan pengguna di dunia virtual kami.">
+    <meta name="keywords" content="virtual club, klub virtual, pengalaman 3D, audio imersif, sosial virtual, DJ online">
+    <meta name="author" content="NexCity Team">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="NexCity | Virtual Club Experience">
+    <meta property="og:description" content="NexCity - Pengalaman klub virtual imersif dengan audio 3D dan interaksi real-time">
+    <meta property="og:image" content="https://i.ibb.co.com/jvMB3Cv1/unnamed-34-2.jpg">
+    <meta property="og:url" content="https://nextcity.vercel.app">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="NexCity">
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="NexCity | Virtual Club Experience">
+    <meta name="twitter:description" content="NexCity - Pengalaman klub virtual imersif dengan audio 3D dan interaksi real-time">
+    <meta name="twitter:image" content="https://i.ibb.co.com/jvMB3Cv1/unnamed-34-2.jpg">
+    
+    <!-- Schema.org Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "EntertainmentBusiness",
+        "name": "NexCity Virtual Club",
+        "description": "Pengalaman klub virtual imersif dengan audio 3D dan interaksi real-time",
+        "url": "https://nextcity.vercel.app",
+        "logo": "https://picsum.photos/seed/nexcity-logo/512/512.jpg",
+        "image": "https://i.ibb.co.com/jvMB3Cv1/unnamed-34-2.jpg",
+        "sameAs": [
+            "https://twitter.com/nexcity.id",
+            "https://instagram.com/nexcity.id"
+        ],
+        "address": {
+            "@type": "VirtualLocation",
+            "name": "NexCity Virtual World"
+        },
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "IDR",
+            "availability": "https://schema.org/InStock"
+        }
+    }
+    </script>
+    
+    <!-- CEO Information Schema -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "NexCity CEO",
+        "jobTitle": "Chief Executive Officer",
+        "image": "https://i.ibb.co.com/jvMB3Cv1/unnamed-34-2.jpg",
+        "url": "https://nextcity.vercel.app/about",
+        "worksFor": {
+            "@type": "Organization",
+            "name": "NexCity"
+        }
+    }
+    </script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+        }
+
+        #landing-page {
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            position: relative;
+        }
+
+        .bg-gif {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            object-fit: cover;
+            opacity: 0.6;
+        }
+
+        .text-outline {
+            -webkit-text-stroke: 1px #ffffff;
+            color: transparent;
+        }
+
+        /* Virtual Room Styles */
+        #virtual-room {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: none;
+            opacity: 0;
+            transition: opacity 1s ease;
+            background: #000;
+        }
+
+        #three-container {
+            position: absolute;
+            inset: 0;
+        }
+
+        .room-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 110;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 1.5rem;
+        }
+
+        /* Loading Screen */
+        #loading-screen {
+            position: fixed;
+            inset: 0;
+            background: black;
+            z-index: 200;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .strobe {
+            position: fixed;
+            inset: 0;
+            background: white;
+            pointer-events: none;
+            z-index: 105;
+            display: none;
+            opacity: 0.15;
+        }
+
+        .interactive { pointer-events: auto; }
+
+        @keyframes pulse-icon {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+        .pulse-headphone { animation: pulse-icon 2s infinite ease-in-out; }
+        
+        /* Comment System Styles - Moved to top */
+        .comment-container {
+            position: absolute;
+            top: 120px;
+            left: 20px;
+            right: 20px;
+            z-index: 120;
+            pointer-events: none;
+            max-height: 40vh;
+            overflow: hidden;
+        }
+        
+        .comment {
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            border-radius: 20px;
+            max-width: 80%;
+            animation: slideUp 8s linear forwards;
+            pointer-events: auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        @keyframes slideUp {
+            0% {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            10% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            80% {
+                transform: translateY(-100px);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-200px);
+                opacity: 0;
+            }
+        }
+        
+        .comment-input-container {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            z-index: 120;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .comment-input {
+            flex: 1;
+            padding: 10px 15px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            color: white;
+            font-size: 14px;
+            outline: none;
+        }
+        
+        .comment-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .comment-send-btn {
+            padding: 10px 15px;
+            background: white;
+            color: black;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .comment-send-btn:hover {
+            background: #f0f0f0;
+            transform: scale(1.05);
+        }
+        
+        /* Online Users Counter */
+        .online-counter {
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 120;
+        }
+        
+        .online-dot {
+            width: 8px;
+            height: 8px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Enhanced Homepage Styles */
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        .feature-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-5px);
+        }
+        
+        .avatar-grid {
+            display: flex;
+            margin-left: -8px;
+        }
+        
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid black;
+            margin-left: -8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .glow-button {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .glow-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .glow-button:hover::before {
+            left: 100%;
+        }
+        
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        /* Guest Login Modal */
+        .guest-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 300;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .guest-modal.active {
+            display: flex;
+        }
+        
+        .guest-form {
+            background: rgba(20, 20, 20, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+        
+        .guest-input {
+            width: 100%;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            margin-bottom: 20px;
+            outline: none;
+            transition: all 0.3s;
+        }
+        
+        .guest-input:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+        
+        .guest-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .guest-button {
+            width: 100%;
+            padding: 15px;
+            background: white;
+            color: black;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .guest-button:hover {
+            background: #f0f0f0;
+            transform: translateY(-2px);
+        }
+        
+        .guest-avatar-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        /* Performance Bar */
+        .performance-bar {
+            position: absolute;
+            bottom: 80px; /* Adjusted to prevent overlap with comment input */
+            left: 20px;
+            right: 20px;
+            z-index: 120;
+        }
+        
+        /* Audio Crossfade Transition */
+        .audio-transition {
+            transition: opacity 2s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Audio Elements - Two for crossfade -->
+    <audio id="club-audio-1" class="audio-transition" loop>
+        <source src="https://nextcity.vercel.app/dj/DJ_BABY_DON_T_GO_X_NAN_KO_PAHAM____DJ_FULL_BASS____DJ_TIKTOK____DJ_MENGKANE_•EndhyFvnky(128k).mp3" type="audio/mpeg">
+    </audio>
+    <audio id="club-audio-2" class="audio-transition" loop>
+        <source src="" type="audio/mpeg">
+    </audio>
+
+    <!-- Landing Page Content -->
+    <div id="landing-page">
+        <!-- Background GIF - Fixed URL -->
+        <img src="https://i.gifer.com/origin/c4/c4f8d9f6e9659138b6555c0f6b2a7f3a_w200.gif" class="bg-gif" alt="Background">
+        
+        <nav class="absolute top-0 w-full z-50 px-6 py-6 flex justify-between items-center">
+            <div class="text-2xl font-black tracking-tighter">NEX<span class="text-outline">CITY</span></div>
+            <button onclick="showGuestModal()" class="glow-button px-5 py-2 border border-white text-[10px] font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-all">
+                Enter Club
+            </button>
+        </nav>
+
+        <section class="h-screen flex items-center justify-center px-6 relative overflow-hidden">
+            <div class="absolute inset-0 opacity-20 pointer-events-none bg-[radial-gradient(circle,_#fff_1px,_transparent_1px)] [background-size:32px_32px]"></div>
+            <div class="text-center relative z-10">
+                <h2 class="text-[10px] tracking-[0.5em] uppercase mb-4 opacity-50">Virtual Society</h2>
+                <h1 class="text-5xl md:text-8xl font-black uppercase leading-tight mb-8">
+                    FUTURE<br><span class="text-outline">STATIONS</span>
+                </h1>
+                <button onclick="showGuestModal()" class="glow-button px-10 py-4 bg-white text-black font-bold uppercase text-xs tracking-[0.3em] hover:bg-gray-200 transition-all">
+                    Mulai Pengalaman
+                </button>
+            </div>
+        </section>
+        
+        <!-- Enhanced Features Section -->
+        <section class="px-6 py-20 relative">
+            <div class="max-w-6xl mx-auto">
+                <h2 class="text-3xl md:text-5xl font-black uppercase mb-16 text-center">
+                    FITUR <span class="text-outline">VIRTUAL</span>
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="feature-card floating" style="animation-delay: 0s;">
+                        <!-- SVG Audio Icon -->
+                        <div class="mb-4 flex justify-center">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5">
+                                <path d="M9 18V5l12-2v13"></path>
+                                <circle cx="6" cy="18" r="3"></circle>
+                                <circle cx="18" cy="16" r="3"></circle>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Audio Immersive</h3>
+                        <p class="text-sm opacity-70 mb-4">Nikmati pengalaman audio 3D yang realistis dengan teknologi spatial audio terkini.</p>
+                        <div class="avatar-grid">
+                            <div class="avatar">A</div>
+                            <div class="avatar">B</div>
+                            <div class="avatar">C</div>
+                            <div class="avatar text-xs">+12</div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-card floating" style="animation-delay: 0.2s;">
+                        <!-- SVG Social Icon -->
+                        <div class="mb-4 flex justify-center">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Sosial Virtual</h3>
+                        <p class="text-sm opacity-70 mb-4">Terhubung dengan pengguna lain dari seluruh dunia dalam ruang virtual interaktif.</p>
+                        <div class="avatar-grid">
+                            <div class="avatar">D</div>
+                            <div class="avatar">E</div>
+                            <div class="avatar">F</div>
+                            <div class="avatar text-xs">+28</div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-card floating" style="animation-delay: 0.4s;">
+                        <!-- SVG Interactive Icon -->
+                        <div class="mb-4 flex justify-center">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5">
+                                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Interaksi Real-time</h3>
+                        <p class="text-sm opacity-70 mb-4">Kontrol lingkungan virtual Anda dengan gerakan dan interaksi real-time.</p>
+                        <div class="avatar-grid">
+                            <div class="avatar">G</div>
+                            <div class="avatar">H</div>
+                            <div class="avatar">I</div>
+                            <div class="avatar text-xs">+7</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-20 text-center">
+                    <div class="inline-flex items-center gap-4 bg-white/5 backdrop-blur-md rounded-full px-6 py-3 border border-white/10">
+                        <div class="flex -space-x-2">
+                            <img src="https://picsum.photos/seed/user1/40/40.jpg" class="w-10 h-10 rounded-full border-2 border-black" alt="User">
+                            <img src="https://picsum.photos/seed/user2/40/40.jpg" class="w-10 h-10 rounded-full border-2 border-black" alt="User">
+                            <img src="https://picsum.photos/seed/user3/40/40.jpg" class="w-10 h-10 rounded-full border-2 border-black" alt="User">
+                            <img src="https://picsum.photos/seed/user4/40/40.jpg" class="w-10 h-10 rounded-full border-2 border-black" alt="User">
+                        </div>
+                        <div class="text-sm">
+                            <span class="font-bold" id="homepage-viewers">24,532</span> penonton online sekarang
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Guest Login Modal -->
+    <div id="guest-modal" class="guest-modal">
+        <div class="guest-form">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold mb-2">MASUK SEBAGAI TAMU</h2>
+                <p class="text-sm opacity-70">Masukkan username Anda untuk bergabung</p>
+            </div>
+            
+            <div id="avatar-preview" class="guest-avatar-preview">?</div>
+            
+            <input type="text" id="guest-username" class="guest-input" placeholder="Username" maxlength="15">
+            
+            <button onclick="guestLogin()" class="guest-button">MASUK</button>
+            
+            <div class="mt-4 text-center">
+                <p class="text-xs opacity-50">Dengan masuk, Anda setuju dengan ketentuan kami</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Screen with Headphone Instruction -->
+    <div id="loading-screen">
+        <div class="pulse-headphone mb-8">
+            <!-- Headphone SVG Icon -->
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+                <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
+            </svg>
+        </div>
+        <h3 class="text-lg font-bold uppercase tracking-widest mb-2">Gunakan Headphone</h3>
+        <p class="text-[10px] opacity-50 uppercase tracking-[0.2em] max-w-[250px]">Untuk pengalaman audio virtual yang maksimal</p>
+        
+        <div class="mt-12 w-48 h-[1px] bg-white/10 relative overflow-hidden">
+            <div id="loader-bar" class="absolute inset-0 bg-white w-0 transition-all duration-300"></div>
+        </div>
+    </div>
+
+    <!-- Virtual Room -->
+    <div id="virtual-room">
+        <div id="strobe-layer" class="strobe"></div>
+        
+        <!-- Online Users Counter -->
+        <div class="online-counter interactive">
+            <div class="online-dot"></div>
+            <span id="online-count">24,532</span> Penonton
+        </div>
+        
+        <div class="room-overlay">
+            <div class="flex justify-between items-start">
+                <div class="interactive">
+                    <div class="text-xl font-black tracking-tighter">NEX<span class="text-outline">CITY</span></div>
+                    <div class="text-[9px] tracking-[0.2em] opacity-40 uppercase">Sector 01 // Audio Active</div>
+                </div>
+                <button onclick="exitRoom()" class="interactive p-2 border border-white/20 bg-black/40 backdrop-blur-md rounded-full">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Comment System - Moved to top -->
+        <div class="comment-container" id="comment-container"></div>
+        
+        <!-- Performance Bar - Moved to prevent overlap -->
+        <div class="performance-bar interactive">
+            <div class="bg-black/60 backdrop-blur-xl p-5 border border-white/10">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="w-1.5 h-1.5 bg-white rounded-full animate-ping"></span>
+                    <span class="text-[9px] font-bold uppercase tracking-widest">Live Performance</span>
+                </div>
+                <h4 id="song-title" class="text-lg font-black uppercase truncate tracking-tight">DJ BABY DON'T GO X NAN KO PAHAM</h4>
+                <div class="mt-4 flex gap-4 text-[9px] font-medium opacity-40 uppercase tracking-widest">
+                    <span id="song-bpm">BPM: 128</span>
+                    <span id="song-genre">Genre: DJ TikTok</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="comment-input-container interactive">
+            <input type="text" id="comment-input" class="comment-input" placeholder="Ketik komentar..." maxlength="50">
+            <button id="comment-send" class="comment-send-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+            </button>
+        </div>
+        
+        <div id="three-container"></div>
+    </div>
+
+    <script>
+        let scene, camera, renderer, particles, grid;
+        const audio1 = document.getElementById('club-audio-1');
+        const audio2 = document.getElementById('club-audio-2');
+        const strobe = document.getElementById('strobe-layer');
+        
+        // Comment System
+        const commentContainer = document.getElementById('comment-container');
+        const commentInput = document.getElementById('comment-input');
+        const commentSendBtn = document.getElementById('comment-send');
+        const onlineCountElement = document.getElementById('online-count');
+        const homepageViewersElement = document.getElementById('homepage-viewers');
+        
+        // Song Information
+        const songTitleElement = document.getElementById('song-title');
+        const songBpmElement = document.getElementById('song-bpm');
+        const songGenreElement = document.getElementById('song-genre');
+        
+        // Guest Login System
+        const guestModal = document.getElementById('guest-modal');
+        const guestUsernameInput = document.getElementById('guest-username');
+        const avatarPreview = document.getElementById('avatar-preview');
+        let currentUser = null;
+        
+        // Song Playlist - Updated with new songs
+        const songs = [
+            { 
+                title: "DJ BABY DON'T GO X NAN KO PAHAM", 
+                bpm: "BPM: 128", 
+                genre: "Genre: DJ TikTok",
+                src: "https://nextcity.vercel.app/dj/DJ_BABY_DON_T_GO_X_NAN_KO_PAHAM____DJ_FULL_BASS____DJ_TIKTOK____DJ_MENGKANE_•EndhyFvnky(128k).mp3" 
+            },
+            { 
+                title: "DJ JOMBLO HEPPY X NENEKKU PAHLAWANKU", 
+                bpm: "BPM: 128", 
+                genre: "Genre: DJ TikTok",
+                src: "https://nextcity.vercel.app/dj/DJ_JOMBLO_HEPPY_X_NENEKKU_PAHLAWANKU____DJ_FULL_BASS____DJ_TIKTOK____DJ_MENGKANE(128k).mp3" 
+            },
+            { 
+                title: "DJ SIKSA MENANGGUNG RINDU", 
+                bpm: "BPM: 140", 
+                genre: "Genre: DJ TikTok",
+                src: "https://nextcity.vercel.app/dj/DJ_SIKSA_MENANGGUNG_RINDU___DJ_AISHITERU_2_SLOW_VIRAL_TIKTOK_FULL_SONG_MAMAN_FVNDY_2025(140).m4a" 
+            },
+            { 
+                title: "DJ SINGKONG KEJU X EL PERDON X BAD LIAR", 
+                bpm: "BPM: 128", 
+                genre: "Genre: DJ TikTok",
+                src: "https://nextcity.vercel.app/dj/DJ_SINGKONG_KEJU_X_EL_PERDON_X_BAD_LIAR____DJ_FULL_BASS____DJ_MENGKANE____DJ_TIKTOK_•EndhyFvnky(128k).mp3" 
+            }
+        ];
+        
+        let currentSongIndex = 0;
+        let currentAudio = audio1;
+        let nextAudio = audio2;
+        let isTransitioning = false;
+        
+        // Function to change song with crossfade
+        function changeSong() {
+            // Prevent multiple transitions
+            if (isTransitioning) return;
+            isTransitioning = true;
+            
+            // Select a random song that's different from the current one
+            let newSongIndex;
+            do {
+                newSongIndex = Math.floor(Math.random() * songs.length);
+            } while (newSongIndex === currentSongIndex);
+            currentSongIndex = newSongIndex;
+            
+            const currentSong = songs[currentSongIndex];
+            
+            // Update song information
+            songTitleElement.textContent = currentSong.title;
+            songBpmElement.textContent = currentSong.bpm;
+            songGenreElement.textContent = currentSong.genre;
+            
+            // Set up the next audio with the new song
+            nextAudio.src = currentSong.src;
+            nextAudio.volume = 0;
+            
+            // Play the next audio
+            nextAudio.play().catch(e => console.log("Audio play blocked", e));
+            
+            // Crossfade: fade out current audio while fading in next audio
+            const fadeDuration = 2000; // 2 seconds
+            const fadeSteps = 20;
+            const fadeInterval = fadeDuration / fadeSteps;
+            let currentStep = 0;
+            
+            const fadeIntervalId = setInterval(() => {
+                currentStep++;
+                
+                // Calculate volume values
+                const currentVolume = 1 - (currentStep / fadeSteps);
+                const nextVolume = currentStep / fadeSteps;
+                
+                // Apply volumes
+                currentAudio.volume = currentVolume;
+                nextAudio.volume = nextVolume;
+                
+                // When fade is complete
+                if (currentStep >= fadeSteps) {
+                    clearInterval(fadeIntervalId);
+                    
+                    // Stop the previous audio
+                    currentAudio.pause();
+                    currentAudio.currentTime = 0;
+                    
+                    // Swap audio references
+                    const temp = currentAudio;
+                    currentAudio = nextAudio;
+                    nextAudio = temp;
+                    
+                    // Reset transition flag
+                    isTransitioning = false;
+                }
+            }, fadeInterval);
+        }
+        
+        // Set up audio ended event for continuous playback
+        currentAudio.addEventListener('ended', () => {
+            if (!isTransitioning) {
+                changeSong();
+            }
+        });
+        
+        // Update avatar preview when username changes
+        guestUsernameInput.addEventListener('input', () => {
+            const username = guestUsernameInput.value.trim();
+            if (username) {
+                avatarPreview.textContent = username.charAt(0).toUpperCase();
+            } else {
+                avatarPreview.textContent = '?';
+            }
+        });
+        
+        // Show guest modal
+        function showGuestModal() {
+            guestModal.classList.add('active');
+            guestUsernameInput.focus();
+        }
+        
+        // Guest login function
+        function guestLogin() {
+            const username = guestUsernameInput.value.trim();
+            if (username) {
+                currentUser = username;
+                guestModal.classList.remove('active');
+                startEnterSequence();
+            }
+        }
+        
+        // Handle Enter key in guest login
+        guestUsernameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                guestLogin();
+            }
+        });
+        
+        // Sample usernames for comments
+        const sampleUsernames = ['DJ_Vortex', 'NeonDreamer', 'CyberPunk', 'RaveMaster', 'TechnoLover', 'BeatDropper', 'BassHunter', 'NightOwl'];
+        
+        // Simulate online users count changes (700 to 120,000)
+        function updateOnlineCount() {
+            const currentCount = parseInt(onlineCountElement.textContent.replace(/,/g, ''));
+            const minChange = -5000;
+            const maxChange = 5000;
+            const change = Math.floor(Math.random() * (maxChange - minChange + 1)) + minChange;
+            const newCount = Math.max(700, Math.min(120000, currentCount + change));
+            
+            // Format with commas
+            const formattedCount = newCount.toLocaleString('id-ID');
+            onlineCountElement.textContent = formattedCount;
+            homepageViewersElement.textContent = formattedCount;
+        }
+        
+        // Create a comment element (without profile picture)
+        function createComment(text, isUser = false) {
+            const comment = document.createElement('div');
+            comment.className = 'comment';
+            
+            const username = isUser ? currentUser : sampleUsernames[Math.floor(Math.random() * sampleUsernames.length)];
+            const timestamp = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            
+            comment.innerHTML = `
+                <div>
+                    <div class="flex items-baseline gap-2 mb-1">
+                        <span class="text-xs font-bold">${username}</span>
+                        <span class="text-xs opacity-50">${timestamp}</span>
+                    </div>
+                    <p class="text-sm">${text}</p>
+                </div>
+            `;
+            
+            commentContainer.appendChild(comment);
+            
+            // Remove comment after animation completes
+            setTimeout(() => {
+                comment.remove();
+            }, 8000);
+        }
+        
+        // Send comment function
+        function sendComment() {
+            const text = commentInput.value.trim();
+            if (text && currentUser) {
+                createComment(text, true);
+                commentInput.value = '';
+                
+                // Simulate responses after a delay
+                if (Math.random() > 0.5) {
+                    setTimeout(() => {
+                        const responses = [
+                            'Lagu ini keren banget!',
+                            'Beatnya mantap 🔥',
+                            'Vibe-nya pas banget malam ini',
+                            'DJ-nya top!',
+                            'Saya ikut bergoyang 🕺',
+                            'Bassnya bikin megoyang'
+                        ];
+                        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                        createComment(randomResponse);
+                    }, 2000 + Math.random() * 3000);
+                }
+            }
+        }
+        
+        // Event listeners for comment system
+        commentSendBtn.addEventListener('click', sendComment);
+        commentInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendComment();
+            }
+        });
+        
+        // Generate random comments periodically
+        function generateRandomComment() {
+            const comments = [
+                'Lagu ini keren banget!',
+                'Beatnya mantap 🔥',
+                'Vibe-nya pas banget malam ini',
+                'DJ-nya top!',
+                'Saya ikut bergoyang 🕺',
+                'Bassnya bikin megoyang',
+                'Love this track!',
+                'Perfect night for this music',
+                'This is my jam!',
+                'Can\'t stop dancing!'
+            ];
+            const randomComment = comments[Math.floor(Math.random() * comments.length)];
+            createComment(randomComment);
+        }
+        
+        // Start generating random comments
+        let commentInterval;
+        function startCommentGeneration() {
+            // Generate initial comments
+            setTimeout(() => generateRandomComment(), 2000);
+            setTimeout(() => generateRandomComment(), 5000);
+            setTimeout(() => generateRandomComment(), 8000);
+            
+            // Then generate periodically
+            commentInterval = setInterval(() => {
+                if (Math.random() > 0.3) { // 70% chance to generate a comment
+                    generateRandomComment();
+                }
+            }, 5000);
+        }
+        
+        function stopCommentGeneration() {
+            clearInterval(commentInterval);
+        }
+
+        function startEnterSequence() {
+            const loading = document.getElementById('loading-screen');
+            const loaderBar = document.getElementById('loader-bar');
+            loading.style.display = 'flex';
+            
+            // Simulasi Loading progress
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                loaderBar.style.width = Math.min(progress, 100) + '%';
+                if(progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(enterRoom, 500);
+                }
+            }, 200);
+        }
+
+        function enterRoom() {
+            document.getElementById('loading-screen').style.display = 'none';
+            document.getElementById('landing-page').style.display = 'none';
+            
+            const room = document.getElementById('virtual-room');
+            room.style.display = 'block';
+            setTimeout(() => room.style.opacity = '1', 50);
+
+            if(!scene) init3D();
+            
+            // Play audio
+            currentAudio.play().catch(e => console.log("Audio play blocked", e));
+            
+            // Start comment generation
+            startCommentGeneration();
+            
+            // Start online count updates
+            setInterval(updateOnlineCount, 5000);
+            
+            // Set up song change interval (every 3 minutes for demo, adjust as needed)
+            // Note: We also have the 'ended' event listener for continuous playback
+            setInterval(changeSong, 180000); // 180000ms = 3 minutes
+        }
+
+        function exitRoom() {
+            const room = document.getElementById('virtual-room');
+            room.style.opacity = '0';
+            currentAudio.pause();
+            
+            // Stop comment generation
+            stopCommentGeneration();
+            
+            // Clear all comments
+            commentContainer.innerHTML = '';
+            
+            // Reset guest login form
+            guestUsernameInput.value = '';
+            avatarPreview.textContent = '?';
+            currentUser = null;
+            
+            setTimeout(() => {
+                room.style.display = 'none';
+                document.getElementById('landing-page').style.display = 'block';
+                document.getElementById('loader-bar').style.width = '0%';
+            }, 1000);
+        }
+
+        function init3D() {
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x000000, 0.05);
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            document.getElementById('three-container').appendChild(renderer.domElement);
+
+            // Grid Floor
+            const gridSize = 100;
+            const gridDivs = 50;
+            grid = new THREE.GridHelper(gridSize, gridDivs, 0x333333, 0x111111);
+            scene.add(grid);
+
+            // Particles
+            const partGeo = new THREE.BufferGeometry();
+            const count = 1500;
+            const pos = new Float32Array(count * 3);
+            for(let i=0; i<count*3; i++) pos[i] = (Math.random() - 0.5) * 60;
+            partGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+            const partMat = new THREE.PointsMaterial({ size: 0.05, color: 0xffffff, transparent: true, opacity: 0.5 });
+            particles = new THREE.Points(partGeo, partMat);
+            scene.add(particles);
+
+            camera.position.y = 1.6;
+            camera.position.z = 8;
+
+            animate();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const time = Date.now() * 0.001;
+
+            // Pergerakan kamera halus
+            camera.position.x = Math.sin(time * 0.5) * 0.5;
+            camera.lookAt(0, 1, 0);
+
+            // Animasi Grid
+            grid.position.z = (time * 2) % 2;
+
+            // Strobe Effect
+            if(Math.random() > 0.98) {
+                strobe.style.display = 'block';
+                setTimeout(() => strobe.style.display = 'none', 40);
+            }
+
+            particles.rotation.y += 0.0005;
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            if(!camera) return;
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
